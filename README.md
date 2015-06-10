@@ -45,11 +45,11 @@ Pictures in pictures directory are made by next two command examples:
 
 ./scopeio.py --noscreen 1 2 1234 --format=svg --view=gimp
 
-![Measurement of one channel](pictures/svg/scope-1-10.06.2015-17.45.52.svg)
+![Measurement of one channel](pictures/svg/scope-1-10.06.2015-17.45.52.svg.png)
 
-![Measurement of one channel](pictures/svg/scope-2-10.06.2015-17.46.10.svg)
+![Measurement of one channel](pictures/svg/scope-2-10.06.2015-17.46.10.svg.png)
 
-![Measurement of fuor channels](pictures/svg/scope-1234-10.06.2015-17.47.07.svg)
+![Measurement of fuor channels](pictures/svg/scope-1234-10.06.2015-17.47.07.svg.png)
 
 Note that scalings vary as different channels are shown. 
 For same display as in oscilloscope the screendump works better.
