@@ -7,7 +7,7 @@ It uses very little modified github project https://github.com/applied-optics/vx
 
 Different from other similar programs this stores the output to files and only  optionally shows them by desired external program.
 
-The screendumps will always be in .bmp format as the data comes as is from the soscilloscope itself.
+The screendumps will always be in .bmp format as the data comes as is from the oscilloscope itself.
 
 The processed outputs can now be taken as .png or .svg format, but of course gnuplot can be modified to generate more options. Also the look of the processed output is very basic, it would need someone knowing gnuplot better to have much nicer pictures.
 
