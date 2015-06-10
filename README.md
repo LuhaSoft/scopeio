@@ -1,5 +1,5 @@
 # scopeio
-Small utility to get screen dumps and meaured data from Rigol DS1054 oscilloscope, using vxi11 software tarnsport
+Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport.
 
 # How it works
 
@@ -36,5 +36,6 @@ There can also be config file ~/.scopeio with all the settings, one per line wit
 Pictures in pictures directory are made by next two command examples:
 
 ./scopeio.py --screen 12 --view=mirage
+
 ./scopeio.py --noscreen 1 2 1234 --format=svg --view=gimp
 
