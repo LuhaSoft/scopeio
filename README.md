@@ -1,5 +1,5 @@
 # scopeio
-Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport.
+Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet.
 
 # How it works
 
