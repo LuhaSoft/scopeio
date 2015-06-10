@@ -17,6 +17,7 @@ Examples of the output files are in pictures directory.
 
 Here is the help from the python program:
 
+```
 Usage: scopeio.py [--help] [--nomeas] [--prefix=namestart] [--view=program] [--format=<fmt>] [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename] channels [channels] ... [channels]
 Default prefix is scope
 Formats supported now: png (default) and svg
@@ -30,6 +31,7 @@ Examples:
   scope --config=~/.scopeio.myconfig       --- alternate config file, default is ~/.scopeio
 
 There can also be config file ~/.scopeio with all the settings, one per line with command line syntax
+```
 
 # Examples
 
@@ -37,14 +39,17 @@ Pictures in pictures directory are made by next two command examples:
 
 ./scopeio.py --screen 12 --view=mirage
 
-https://github.com/LuhaSoft/scopeio/blob/master/pictures/bmp/scope-screendump-10.06.2015-17.44.38.bmp
+![Screendump converted ro png for viewing here](pictures/bmp/scope-screendump-10.06.2015-17.44.38.png)
 
-https://github.com/LuhaSoft/scopeio/blob/master/pictures/png/scope-12-10.06.2015-17.45.09.png
+![Measurement of two channels](pictures/png/scope-12-10.06.2015-17.45.09.png)
 
 ./scopeio.py --noscreen 1 2 1234 --format=svg --view=gimp
 
-https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-1-10.06.2015-17.45.52.svg
+![Measurement of one channel](pictures/svg/scope-1-10.06.2015-17.45.52.svg)
 
-https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-2-10.06.2015-17.46.10.svg
+![Measurement of one channel](pictures/svg/scope-2-10.06.2015-17.46.10.svg)
 
-https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-1234-10.06.2015-17.47.07.svg
+![Measurement of fuor channels](pictures/svg/scope-1234-10.06.2015-17.47.07.svg)
+
+Note that scalings vary as different channels are shown. 
+For same display as in oscilloscope the screendump works better.
