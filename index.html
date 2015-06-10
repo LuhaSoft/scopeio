@@ -1,40 +1,31 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Scopeio : Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet">
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Scopeio</title>
+    <meta charset="UTF-8">
+    <title>Scopeio by LuhaSoft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
+    <section class="page-header">
+      <h1 class="project-name">Scopeio</h1>
+      <h2 class="project-tagline">Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet</h2>
+      <a href="https://github.com/LuhaSoft/scopeio" class="btn">View on GitHub</a>
+      <a href="https://github.com/LuhaSoft/scopeio/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/LuhaSoft/scopeio/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/LuhaSoft/scopeio">View on GitHub</a>
+    <section class="main-content">
+      <hr>
 
-          <h1 id="project_title">Scopeio</h1>
-          <h2 id="project_tagline">Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/LuhaSoft/scopeio/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/LuhaSoft/scopeio/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
+<h1>
 <a id="scopeio" class="anchor" href="#scopeio" aria-hidden="true"><span class="octicon octicon-link"></span></a>scopeio</h1>
 
-<p>Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet. Controlling the oscilloscope is possible, so any gui could be build over the vxi11 transport, but for now this is just a command line tool.</p>
+<h2>
+<a id="small-utility-to-get-screen-dumps-and-measured-data-from-rigol-ds1054-oscilloscope-using-vxi11-software-transport-over-ethernet-controlling-the-oscilloscope-is-possible-so-any-gui-could-be-build-over-the-vxi11-transport-but-for-now-this-is-just-a-command-line-tool" class="anchor" href="#small-utility-to-get-screen-dumps-and-measured-data-from-rigol-ds1054-oscilloscope-using-vxi11-software-transport-over-ethernet-controlling-the-oscilloscope-is-possible-so-any-gui-could-be-build-over-the-vxi11-transport-but-for-now-this-is-just-a-command-line-tool" aria-hidden="true"><span class="octicon octicon-link"></span></a>Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet. Controlling the oscilloscope is possible, so any gui could be build over the vxi11 transport, but for now this is just a command line tool.</h2>
 
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h1>
@@ -47,14 +38,17 @@
 
 <p>The processed outputs can now be taken as .png or .svg format, but of course gnuplot can be modified to generate more options. Also the look of the processed output is very basic, it would need someone knowing gnuplot better to have much nicer pictures.</p>
 
-<p>Examples of the output files are in pictures directory.</p>
+<h2>
+<a id="examples-of-the-output-files-are-in-pictures-directory" class="anchor" href="#examples-of-the-output-files-are-in-pictures-directory" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples of the output files are in pictures directory.</h2>
 
 <h1>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
 
 <p>Here is the help from the python program:</p>
 
-<pre><code>Usage: scopeio.py [--help] [--nomeas] [--prefix=namestart] [--view=program] [--format=&lt;fmt&gt;] [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename] channels [channels] ... [channels]
+<pre><code>Usage: scopeio.py [--help] [--nomeas] [--prefix=namestart] [--view=program] 
+          [--format=&lt;fmt&gt;] [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename] 
+          channels [channels] ... [channels]
 Default prefix is scope
 Formats supported now: png (default) and svg
 Examples:
@@ -69,39 +63,45 @@ Examples:
 There can also be config file ~/.scopeio with all the settings, one per line with command line syntax
 </code></pre>
 
+<hr>
+
 <h1>
 <a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h1>
 
 <p>Pictures in pictures directory are made by next two command examples:</p>
 
+<hr>
+
 <p>./scopeio.py --screen 12 --view=mirage</p>
 
-<p><img src="pictures/bmp/scope-screendump-10.06.2015-17.44.38.png" alt="Screendump converted ro png for viewing here"></p>
+<p><img src="https://drive.google.com/open?id=0BytTPdaeqnmnMFJhRGtUVEhKeTQ&amp;authuser=0" alt="Screendump converted to png to be smaller"></p>
 
-<p><img src="pictures/png/scope-12-10.06.2015-17.45.09.png" alt="Measurement of two channels"></p>
+<p><img src="https://drive.google.com/open?id=0BytTPdaeqnmneTNsMmZwR1MzVms&amp;authuser=0" alt="Measurement of two channels"></p>
+
+<hr>
 
 <p>./scopeio.py --noscreen 1 2 1234 --format=svg --view=gimp</p>
 
-<p><img src="pictures/svg/scope-1-10.06.2015-17.45.52.svg.png" alt="Measurement of one channel"></p>
+<p><img src="https://drive.google.com/open?id=0BytTPdaeqnmnY2gxeWxvTHlpYzQ&amp;authuser=0" alt="Measurement of one channel"></p>
 
-<p><img src="pictures/svg/scope-2-10.06.2015-17.46.10.svg.png" alt="Measurement of one channel"></p>
+<p><img src="https://drive.google.com/open?id=0BytTPdaeqnmnNVNpTVNHd3dRd2s&amp;authuser=0" alt="Measurement of one channel"></p>
 
-<p><img src="pictures/svg/scope-1234-10.06.2015-17.47.07.svg.png" alt="Measurement of fuor channels"></p>
+<p><img src="https://drive.google.com/open?id=0BytTPdaeqnmncHFwTTc0U29FekE&amp;authuser=0" alt="Measurement of four channels"></p>
+
+<hr>
 
 <p>Note that scalings vary as different channels are shown. 
 For same display as in oscilloscope the screendump works better.</p>
-      </section>
-    </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Scopeio maintained by <a href="https://github.com/LuhaSoft">LuhaSoft</a></p>
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/LuhaSoft/scopeio">Scopeio</a> is maintained by <a href="https://github.com/LuhaSoft">LuhaSoft</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
 
-    
+    </section>
 
+  
   </body>
 </html>
+
