@@ -37,5 +37,14 @@ Pictures in pictures directory are made by next two command examples:
 
 ./scopeio.py --screen 12 --view=mirage
 
+https://github.com/LuhaSoft/scopeio/blob/master/pictures/bmp/scope-screendump-10.06.2015-17.44.38.bmp
+
+https://github.com/LuhaSoft/scopeio/blob/master/pictures/png/scope-12-10.06.2015-17.45.09.png
+
 ./scopeio.py --noscreen 1 2 1234 --format=svg --view=gimp
 
+https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-1-10.06.2015-17.45.52.svg
+
+https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-2-10.06.2015-17.46.10.svg
+
+https://github.com/LuhaSoft/scopeio/blob/master/pictures/svg/scope-1234-10.06.2015-17.47.07.svg
