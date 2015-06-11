@@ -19,29 +19,46 @@ class scopeIO():
                 self.nomeas = False
                 self.view   = ''
                 self.screen = False
+                self.screenmode = 'RUN'
                 self.outformat = '.png'
                 self.leftargv = []
                 self.files = ''
                 self.timescale = 1.0
                 self.config = '~/.scopeio'
                 self.addr = '0.0.0.0'
+                self.nomodes = False
+                self.mode = ''
+                self.after = ''
+                self.size='1000,640'
                 # device needed for vxi11_cmd.cc special handling
                 self.device = 'Rigol_DS1054'
                 
         def Usage(self):
-                print('Usage: scopeio.py [--help] [--nomeas] [--prefix=namestart] [--view=program] [--format=<fmt>] [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename] channels [channels] ... [channels]')
-                print('Default prefix is scope')
-                print('Formats supported now: png (default) and svg') 
+                print('Usage: scopeio.py [--nomeas] [--nomodes] [--mode=state] [--after=state]')
+                print('     [--help] [--prefix=namestart] [--view=program] [--format=<fmt>] ')
+                print('     [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename]')
+                print('     [--size=xsize,ysize] [channels] ... [channels]')
+                print('')
+                print('Default prefix is "scope".')
+                print('Formats supported now: png (default) and svg.')
+                print('Setting --nomodes means that scope is not stopped or run during capture.')
+                print('Setting --mode=STOP or --mode=RUN is mode for measurement time and similarly')
+                print('--after=STOP or --after=RUN is mode left on after measurement. Default is')
+                print('not to change scope mode.')
+                print('Default size is 1000,640 pixels, can be for example by --size=800,480, this')
+                print('does not affect the screendump, which is always 800,480 from the scope')
+                print('')
                 print('Examples:')
-                print('  scope --nomeas --view=mirage 1           -- channel1 shown in mirage with no measurements (faster)')
-                print('  scope 12 34 13 23  --prefix=myfile       -- ch1/ch2 ch3/ch4 ch1/ch3 ch3/ch4 images done in png with measurements')
+                print('  scope --nomeas --view=mirage 1           -- ch1 shown in mirage with no measurements (faster)')
+                print('  scope 12 34 13 23  --prefix=myfile       -- ch1/ch2 ch3/ch4 ch1/ch3 ch3/ch4 images done')
                 print('  scope --view=gimp 1234 --format=svg      -- all 4 channels in svg and send to gimp')
-                print('  scope --screen                           --- take only display screen dump')
-                print('  scope --screen 12                        --- take screen dump and two channel graph')
-                print('  scope --addr=192.168.1.100 1 --noscreen  --- scope ip address set, no screen capture even when config file has screen on')
+                print('  scope --screen --mode=STOP               --- take only display screen dump, STOP the scope')
+                print('  scope --screen 12 --nomodes              --- take screen dump and two channel graph, no STOP/RUN')
+                print('  scope --addr=192.168.1.100 1 --noscreen  --- scope ip address set, no screen capture')
                 print('  scope --config=~/.scopeio.myconfig       --- alternate config file, default is ~/.scopeio')
                 print('')
-                print('There can also be config file ~/.scopeio with all the settings, one per line with command line syntax')
+                print('Default config file is  ~/.scopeio, all above settings can be there, one per line, same syntax,')
+                print('lines starting with # are taken as comments.')
                 
                 exit(0)
 
@@ -49,12 +66,26 @@ class scopeIO():
                 for item in argv[1:]:
                         if item == '--nomeas':
                                 self.nomeas = True
+                        elif item == '--nomodes':
+                                self.nomodes = True
                         elif item == '--help':
                                 self.Usage()
                         elif item[0:7] == '--view=':
                                 self.view = item[7:]
                         elif item[0:7] == '--addr=':
                                 self.addr = item[7:]
+                        elif item[0:7] == '--size=':
+                                self.size = item[7:]
+                        elif item[0:7] == '--mode=':
+                                if item[7:] == 'RUN': 
+                                        self.mode = 'RUN'
+                                if item[7:] == 'STOP': 
+                                        self.mode = 'STOP'
+                        elif item[0:8] == '--after=':
+                                if item[8:] == 'RUN': 
+                                        self.after = 'RUN'
+                                if item[8:] == 'STOP': 
+                                        self.after = 'STOP'
                         elif item[0:8] == '--screen':
                                 self.screen = True
                         elif item[0:10] == '--noscreen':
@@ -102,6 +133,8 @@ class scopeIO():
                 result = self.Cmd(':WAVEFORM:POINT:MODE NORMAL', 20)
                 result = self.Cmd(':TIMEBASE:MAIN:SCALE?', 20)
                 self.timescale = float(result[24:])
+                self.min_value = 1e10
+                self.max_value = -1e10
                 while channels != '':
                         print('')
                         chnow = 'CHAN' + channels[0]
@@ -112,7 +145,12 @@ class scopeIO():
                         data = data.split(',')
                         fdata = []
                         for item in data:
-                                fdata.append(float(item))
+                                value = float(item)
+                                if value < self.min_value:
+                                        self.min_value = value
+                                if value > self.max_value:
+                                        self.max_value = value
+                                fdata.append(value)
                         self.alldata.append(fdata)
 
         def Meas(self, channels):
@@ -146,12 +184,22 @@ class scopeIO():
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + channels + '-' + now + self.outformat
                 tu = 's'
-                if self.timescale < 0.001:
-                        self.timescale = self.timescale * 1000
-                        tu = 'ms'
-                elif self.timescale < 0.000001:
-                        self.timescale = self.timescale * 1000000
+                if self.timescale < 1e-6:
+                        self.timescale = self.timescale * 1e9
+                        tu = 'ns'
+                elif self.timescale < 1e-3:
+                        self.timescale = self.timescale * 1e6
                         tu = 'us'
+                elif self.timescale < 1e-0:
+                        self.timescale = self.timescale * 1e3
+                        tu = 'ms'
+                i = 1
+                tics = '('
+                while i < 11:
+                        tics = tics + '("' + str(int(self.timescale*i)) + tu[0] + '") ' + str(i*100) + ',' 
+                        i += 1
+                tics = tics + '("' + str(int(self.timescale*i)) + tu[0] + '") ' + str(i*100) + ')' 
+                        
                 g = Gnuplot.Gnuplot()
                 i = 0
                 gdata=[]
@@ -164,11 +212,16 @@ class scopeIO():
 
                 g.title('Rigol DS1054')
                 if self.outformat == '.svg':
-                        g('set term svg size 1800,900')
+                        g('set term svg size ' + self.size)
                 else:
-                        g('set term png size 1800,900')
+                        g('set term png size ' + self.size)
                 g('set output \'' + fname + '\'')
                 g('set key left')
+                ymin = self.min_value - 0.1 * (self.max_value - self.min_value)
+                ymax = self.max_value + 0.2 * (self.max_value - self.min_value)
+                g('set yrange [' + str(ymin) + ':' + str(ymax) + ']')
+                g('set xrange [0:1200]')
+                g('set xtics ' + tics)
                 g('set xlabel \' Time ' + str(self.timescale) + ' ' + tu  + ' per div\'')
                 g('set ylabel \' Voltage in V\'')
                 g('set grid')
@@ -189,10 +242,8 @@ class scopeIO():
                 return str(fname + ' ')
 
         def RunOne(self, channels):
-                result = self.Cmd(':STOP',20)
                 self.Waveform(channels)
                 self.Meas(channels)
-                result = self.Cmd(':RUN',20)
                 return self.Graph(channels)
 
         def Screendump(self):
@@ -269,10 +320,16 @@ class scopeIO():
 
                 if self.addr == '0.0.0.0':
                         self.Usage()
-                        
+
                 self.p = pexpect.spawn('vxi11_cmd ' + self.addr + ' ' +  self.device)
                 self.WaitPrompt(20)
-
+                        
+                if self.nomodes == False:
+                        if self.mode == 'RUN':
+                                result = self.Cmd(':RUN',10)
+                        if self.mode == 'STOP':
+                                result = self.Cmd(':STOP',10)                        
+                
                 if self.screen == True:
                         file = self.Screendump()
                         if file != '':
@@ -282,6 +339,12 @@ class scopeIO():
                         file = self.RunOne(item)
                         if file != '':
                                 self.files = self.files + file
+
+                if self.nomodes == False:
+                        if self.after == 'RUN':
+                                result = self.Cmd(':RUN',10)
+                        if self.after == 'STOP':
+                                result = self.Cmd(':STOP',10)                        
 
                 if self.view == '':
                         print('')
