@@ -218,13 +218,18 @@ class scopeIO():
                 fname = self.prefix + '-screendump-' + now + '.bmp'
                 newFile = open(fname, "wb")
                 j = 0;
-                datalen -= i + 10
+                datalen -= 8
                 bindata=bytearray()
                 while j < datalen*2:
                         hexval = result[j+i+10:j+i+12]
                         value = int(hexval, 16)
                         bindata.append(value & 0xff)
                         j += 2
+                # some data is lost according convert program, replace with zeros
+                j = 0
+                while j < 8:
+                        bindata.append(0)
+                        j += 1
                 newFile.write(bindata)
                 newFile.close()
                 return(fname + ' ')
