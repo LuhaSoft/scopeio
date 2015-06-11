@@ -60,7 +60,7 @@ Pictures in pictures directory are made by next two command examples:
 
 ![Measurement of one channel](pictures/scope-1-11.06.2015-07.20.01.png)
 
-![Measurement of one channel](pictures/scope-2-11.06.2015-17.20.21.png)
+![Measurement of one channel](pictures/scope-2-11.06.2015-07.20.21.png)
 
 ![Measurement of four channels](pictures/scope-1234-11.06.2015-07.21.21.png)
 
