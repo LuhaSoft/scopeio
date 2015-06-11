@@ -1,9 +1,9 @@
 # scopeio
 Small utility to get screen dumps and measured data from Rigol DS1054 oscilloscope, using vxi11 software transport over Ethernet. Controlling the oscilloscope is possible, so any gui could be build over the vxi11 transport, but for now this is just a command line tool.
 
-Obviously there is not so much to do as the transport below is suitable with just one small patch, but that is neededin to get screendump working and is maybe Rigol scope specific, so this cannot be merged in the vxi11 general code.
+Obviously there is not so much to do as the transport below is suitable with just one small patch, but that is needed to get screendump working and is maybe Rigol scope specific, so this cannot be merged in the vxi11 general code.
 
-Also the scope does make screendump in bmp format, just need to store it. And teh scope does do the scaling of waveform too in ASCII mode, so the neede math is very minimal.
+Also the scope does make screendump in bmp format, just need to store it. And the scope does do the scaling of waveform too in ASCII mode, so the needed math is very minimal.
 
 
 # How it works
