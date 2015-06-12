@@ -12,7 +12,7 @@ import pexpect
 from numpy import *
 import Gnuplot, Gnuplot.funcutils
 
-import vxi11_python
+import vxi11
 
 class scopeIO():
 
@@ -32,7 +32,7 @@ class scopeIO():
                 self.mode = ''
                 self.after = ''
                 self.size='1000,640'
-                # device needed for vxi11_cmd.cc special handling
+		self.sequence = 1
                 self.device = 'Rigol_DS1054'
                 
         def Usage(self):
@@ -115,7 +115,7 @@ class scopeIO():
                 sys.stdout.flush()
                 rlen = 0;
                 try:
-                        rlen = vxi11_python.cmd(cmd)
+                        rlen = vxi11.cmd(cmd)
                 except:
                         return 'Write timeout:' + cmd
                 sys.stdout.write('.')
@@ -123,7 +123,7 @@ class scopeIO():
                 resp = ''
                 i = 0
                 while rlen > 0:
-                        resp = resp + vxi11_python.resp(i)
+                        resp = resp + vxi11.resp(i)
                         i += 1
                         rlen -= 1
                 return resp
@@ -182,7 +182,8 @@ class scopeIO():
         def Graph(self,channels):         
 
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
-                fname = self.prefix + '-' + channels + '-' + now + self.outformat
+                fname = self.prefix + '-' + str(self.sequence) + '-' + channels + '-' + now + self.outformat
+		self.sequence += 1
                 tu = 's'
                 if self.timescale < 1e-6:
                         self.timescale = self.timescale * 1e9
@@ -251,7 +252,8 @@ class scopeIO():
                         return ' '
                 result = self.Cmd(':DISPLAY:DATA?',300)[11:-3]
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
-                fname = self.prefix + '-screendump-' + now + '.bmp'
+                fname = self.prefix + '-' + str(self.sequence)+ '-screendump-' + now + '.bmp'
+		self.sequence += 1
                 newFile = open(fname, "wb")
                 bindata=bytearray(result)
                 newFile.write(bindata)
@@ -294,7 +296,7 @@ class scopeIO():
                 if self.addr == '0.0.0.0':
                         self.Usage()
 
-                st = vxi11_python.open(self.addr,self.device)
+                st = vxi11.open(self.addr,self.device)
                 if st != 0:
                    print('Could not connect to scope')
                    exit(0)
@@ -321,7 +323,7 @@ class scopeIO():
                         if self.after == 'STOP':
                                 result = self.Cmd(':STOP',10)                        
 
-                st = vxi11_python.close(self.addr)
+                st = vxi11.close(self.addr)
                 
                 if self.view == '':
                         print('')

@@ -1,5 +1,5 @@
  /* vxi11_python.i */
- %module vxi11_python
+ %module vxi11
  %{
  /* Put header files here or function declarations like below */
 
