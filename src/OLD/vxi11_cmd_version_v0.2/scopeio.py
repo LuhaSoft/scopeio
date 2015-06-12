@@ -12,8 +12,6 @@ import pexpect
 from numpy import *
 import Gnuplot, Gnuplot.funcutils
 
-import vxi11_python
-
 class scopeIO():
 
         def __init__(self):
@@ -108,33 +106,33 @@ class scopeIO():
                                 if parsed != '':
                                         self.leftargv.append(parsed)
 
-
+        def WaitPrompt(self,waittime):
+                try:
+                        self.p.expect('Input command or query .*:', timeout=waittime)
+                except:
+                        print('Prompt wait timeout')
+                
         def Cmd(self,cmd,waittime):
                 cmd = cmd + '\n'
                 sys.stdout.write('-')
                 sys.stdout.flush()
-                rlen = 0;
                 try:
-                        rlen = vxi11_python.cmd(cmd)
+                        self.p.writelines(cmd)
                 except:
                         return 'Write timeout:' + cmd
+                self.WaitPrompt(waittime)
                 sys.stdout.write('.')
                 sys.stdout.flush()
-                resp = ''
-                i = 0
-                while rlen > 0:
-                        resp = resp + vxi11_python.resp(i)
-                        i += 1
-                        rlen -= 1
-                return resp
+                #print(self.p.before)
+                return self.p.before
 
         def Waveform(self, channels):
-                self.alldata = []
+                self.alldata= []
                 print('')
                 result = self.Cmd(':WAVEFORM:FORMAT ASCII', 20)
                 result = self.Cmd(':WAVEFORM:POINT:MODE NORMAL', 20)
                 result = self.Cmd(':TIMEBASE:MAIN:SCALE?', 20)
-                self.timescale = float(result)
+                self.timescale = float(result[24:])
                 self.min_value = 1e10
                 self.max_value = -1e10
                 while channels != '':
@@ -142,14 +140,12 @@ class scopeIO():
                         chnow = 'CHAN' + channels[0]
                         channels = channels[1:]
                         result = self.Cmd(':WAVEFORM:SOURCE ' + chnow,20)
-                        data = self.Cmd(':WAVEFORM:DATA?',180)[11:]
+                        data = self.Cmd(':WAVEFORM:DATA?',180)
+                        data = data[29:-3]
                         data = data.split(',')
                         fdata = []
                         for item in data:
-                                try:
-                                        value = float(item)
-                                except:
-                                        break
+                                value = float(item)
                                 if value < self.min_value:
                                         self.min_value = value
                                 if value > self.max_value:
@@ -166,17 +162,21 @@ class scopeIO():
                         chmeas = chnow
                         if self.nomeas == False:
                                 result = self.Cmd(':MEASURE:ITEM:VPP ' + chnow,20)
+                                #time.sleep(0.1)
                                 result = self.Cmd(':MEASURE:ITEM? VPP,' + chnow,20)
-                                chmeas = chmeas + '  VPP:' + str(float(result))
+                                chmeas = chmeas + '  VPP:' + str(float(result[25:-3]))
                                 result = self.Cmd(':MEASURE:ITEM:VMAX ' + chnow,20)
+                                #time.sleep(0.1)
                                 result = self.Cmd(':MEASURE:ITEM? VMAX,' + chnow,20)
-                                chmeas = chmeas + '  VMAX:' + str(float(result))
+                                chmeas = chmeas + '  VMAX:' + str(float(result[26:-3]))
                                 result = self.Cmd(':MEASURE:ITEM:VMIN ' + chnow,20)
+                                #time.sleep(0.1)
                                 result = self.Cmd(':MEASURE:ITEM? VMIN,' + chnow,20)
-                                chmeas = chmeas + '  VMIN:' + str(float(result))
+                                chmeas = chmeas + '  VMIN:' + str(float(result[26:-4]))
                                 result = self.Cmd(':MEASURE:ITEM:FREQ ' + chnow,20)
+                                #time.sleep(0.1)
                                 result = self.Cmd(':MEASURE:ITEM? FREQ,' + chnow,20)
-                                chmeas = chmeas + '  FREQUENCY:' + str(float(result))
+                                chmeas = chmeas + '  FREQUENCY:' + str(float(result[26:-4]))
                         self.meas.append(chmeas)
                 
         def Graph(self,channels):         
@@ -249,11 +249,38 @@ class scopeIO():
         def Screendump(self):
                 if self.screen == False:
                         return ' '
-                result = self.Cmd(':DISPLAY:DATA?',300)[11:-3]
+                result = self.Cmd(':DISPLAY:DATA?',180)
+                i = 0
+                ch = ''
+                while ch != '#':
+                        ch = result[i]
+                        i = i + 1
+                        if i > 100:
+                                print('screendump not found')
+                                return('')
+                if result[i] != '9':
+                        print('screendump not found')
+                        return('')
+                datalen = int(result[i+1:i+10],10)
+                if datalen != 1152054:
+                        print('screendump size wrong')
+                        return('')
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-screendump-' + now + '.bmp'
                 newFile = open(fname, "wb")
-                bindata=bytearray(result)
+                j = 0;
+                datalen -= 8
+                bindata=bytearray()
+                while j < datalen*2:
+                        hexval = result[j+i+10:j+i+12]
+                        value = int(hexval, 16)
+                        bindata.append(value & 0xff)
+                        j += 2
+                # some data is lost according convert program, replace with zeros
+                j = 0
+                while j < 8:
+                        bindata.append(0)
+                        j += 1
                 newFile.write(bindata)
                 newFile.close()
                 return(fname + ' ')
@@ -294,11 +321,9 @@ class scopeIO():
                 if self.addr == '0.0.0.0':
                         self.Usage()
 
-                st = vxi11_python.open(self.addr,self.device)
-                if st != 0:
-                   print('Could not connect to scope')
-                   exit(0)
-                   
+                self.p = pexpect.spawn('vxi11_cmd ' + self.addr + ' ' +  self.device)
+                self.WaitPrompt(20)
+                        
                 if self.nomodes == False:
                         if self.mode == 'RUN':
                                 result = self.Cmd(':RUN',10)
@@ -321,8 +346,6 @@ class scopeIO():
                         if self.after == 'STOP':
                                 result = self.Cmd(':STOP',10)                        
 
-                st = vxi11_python.close(self.addr)
-                
                 if self.view == '':
                         print('')
                         print('Files created:' + self.files)

@@ -1,0 +1,5 @@
+   sudo apt-get install python-numpy python-pexpect python-gnuplot python-dev build-essential swig
+   make -f Makefile.swig clean all
+   sudo make -f Makefile.swig install
+
+
