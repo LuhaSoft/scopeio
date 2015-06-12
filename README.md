@@ -72,14 +72,14 @@ Pictures in pictures directory are made by next two command examples:
 
 ./scopeio.py --noscreen --nomeas 1 1 1 1 1 1 1 1 1 1 1234
 
-![First measurement of ch1](images/scope-1-1-12.06.2015-09.29.45.png)
+![First measurement of ch1](images/scope-1-1-12.06.2015-12.12.26.png)
 
-![Tenth measurement of ch1](images/scope-10-1-12.06.2015-09.29.51.png)
+![Tenth measurement of ch1](images/scope-10-1-12.06.2015-12.12.33.png)
 
 Without the default measurements the taking of waveform is under one second, time between the ten is 8 seconds.
 With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measuremnt is around 2 seconds.
 
-![Measurement of four channels](images/scope-11-11234-12.06.2015-09.29.53.png)
+![Measurement of four channels](images/scope-11-1234-12.06.2015-12.12.35.png)
 
 Note that scalings vary as different channels are shown, because the measurement is not a screen capture, it is not scaled in y-axis, the scope calculates real value itself. So when channels have different amplitude, you may want them in separate pictures. Screendump is of course much better to get same display as in oscilloscope screen.
 
