@@ -1,0 +1,7 @@
+include LICENSE
+include README.rst
+include vxi11/vxi11.py
+include vxi11/vxi11.pyc
+include vxi11/_vxi11.so
+
+
