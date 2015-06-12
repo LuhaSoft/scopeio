@@ -77,7 +77,7 @@ Pictures in pictures directory are made by next two command examples:
 ![Tenth measurement of ch1](images/scope-10-1-12.06.2015-12.12.33.png)
 
 Without the default measurements the taking of waveform is under one second, time between the ten is 8 seconds.
-With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measuremnt is around 2 seconds.
+With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measurement is around 2 seconds.
 
 ![Measurement of four channels](images/scope-11-1234-12.06.2015-12.12.35.png)
 
