@@ -29,7 +29,7 @@ Controlling the oscilloscope is possible, so any gui could be build over the vxi
 
 <p>Also the scope does make screendump in bmp format, just need to store it. And the scope does do the scaling of waveform too in ASCII mode, so the needed math is very minimal.</p>
 
-<p>Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python one byte at a time, but anyway the screendump at least takes time on the scope much more than receiving the result.</p>
+<p>Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python eight bytes in one call, but anyway the screendump at least takes time on the scope much more than receiving the result.</p>
 
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h1>
@@ -100,10 +100,11 @@ lines starting with # are taken as comments.
 
 <p><img src="images/scope-1-1-12.06.2015-12.12.26.png" alt="First measurement of ch1"></p>
 
-<p><img src="images/scope-10-1-12.06.2015-12.12.33" alt="Tenth measurement of ch1"></p>
+<p><img src="images/scope-10-1-12.06.2015-12.12.33.png" alt="Tenth measurement of ch1"></p>
 
 <p>Without the default measurements the taking of waveform is under one second, time between the ten is 8 seconds.
-With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measurement is around 2 seconds.</p>
+With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measurement is around 2 seconds.
+Starting from release v0.4-beta the speed is improved to 10/6 seconds without measurements and 10/11 seconds with the four measurements, because reading from vxi11 part was changed from 1 byte mode to 8 byte mode. So the speed in nearly doubled now.</p>
 
 <p><img src="images/scope-11-1234-12.06.2015-12.12.35.png" alt="Measurement of four channels"></p>
 
