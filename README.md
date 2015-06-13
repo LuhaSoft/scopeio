@@ -78,6 +78,8 @@ Pictures in pictures directory are made by next two command examples:
 
 Without the default measurements the taking of waveform is under one second, time between the ten is 8 seconds.
 With the four measurements (VPP, VMAX, VMIN and FREQUENCY) the time for one measurement is around 2 seconds.
+Starting from release v0.4-beta the speed is improved to 10/6 seconds without measurements and 10/11 seconds with the four measurements, because reading from vxi11 part was changed from 1 byte mode to 8 byte mode. So the speed in nearly doubled now.
+
 
 ![Measurement of four channels](images/scope-11-1234-12.06.2015-12.12.35.png)
 
