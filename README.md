@@ -6,7 +6,7 @@ Obviously there is not so much to do as the transport below is works with very l
 
 Also the scope does make screendump in bmp format, just need to store it. And the scope does do the scaling of waveform too in ASCII mode, so the needed math is very minimal.
 
-Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python one byte at a time, but anyway the screendump at least takes time on the scope much more than receiving the result.
+Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python eight bytes in one call, but anyway the screendump at least takes time on the scope much more than receiving the result.
 
 # How it works
 
