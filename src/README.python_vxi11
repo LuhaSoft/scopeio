@@ -1,0 +1,51 @@
+There is no need to change anything in original vxi11 software.
+
+Stucture of python interfaces is following:
+
+vxi11 is python module, contents are:
+
+	- _vxi11cc.so 
+        =============       
+		- is the shared library
+		- build from source vxi11cc_python.cc and vxi11cc_python.h
+		- swig definitions in vxi11cc_python.i
+		- contains following functions:
+	    		- c++: PLINK *iconnect(char *device_ip, long buffersize, char *device_name);
+				=> python call: plink = iconnect('a.b.c.d','name')
+    			- c++: int icommand(PLINK *plink, char *command, long timeout_ms);
+				=> python call: blen = icommand(plink,'*IDN?', 1000)
+    			- c++: long long iresponse(PLINK *plink,long index);
+				=> python calls: value = iresponse(plink, index)
+    			- c++: int idisconnect(PLINK *plink);
+				=> python calls: idisconnect(plink)
+  			these calls are not supposed to be used directly, but via class pconn
+
+	class pconn(self):
+        ==================
+        	def connect(self, device_ip, buffer_size=1024*1024, device_name=''):
+	   		...
+           		return(connected)
+		def command(self, command, timeout_ms=1000, mode='ASC'):
+            		...
+            		return(ASCII or binary response)
+        	def disconnect(self):
+            		return
+
+
+
+So the final python code using this is:
+=======================================
+
+       p = vxi11.pconn()
+       pc = p.connect('a.b.c.d')
+       if pc == None:
+	   exit(0)
+       resp = p.command(pc, '*IDN?')
+       print(resp)
+       resp = p.command(pc, 'DISPLAY:DATA?', 10000, 'BIN')
+       # response is binary data
+       p.disconnect(pc)
+       del p
+
+
+

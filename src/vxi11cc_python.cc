@@ -2,7 +2,7 @@
    Adapted for a python interface from vxi11_cmd.cc by khaho.
    Copyright below is kept just to show that adaptation is legal
 */
-   
+ 
 
 /* vxi11_cmd.c
  * Copyright (C) 2006 Steve D. Sharples
@@ -15,55 +15,79 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- * 
+ *
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
 #include "vxi11_1.10/vxi11_user.h"
 #include "vxi11_python.h"
 
-#define MAX_RESP 20*1024*1024
-
-char cmd_buffer[MAX_RESP];
-
-CLINK *clink;
-
-int open(char *device_ip, char *device_name) 
+CLINK *iconnect(char *device_ip, buffer_size, char *device_name)
 {
-        clink = new CLINK;
-	return vxi11_open_device(device_ip, clink, device_name);
+	char *cp;
+	PLINK *plink;
+
+	if (device_ip == NULL) return NULL;
+
+	cp  = malloc(buffer_size);
+	if (cp == NULL) return NULL;
+
+	plink = new PLINK;
+
+	plink->buffer_size = buffer_size;
+	plink->buffer = cp;
+
+	plink->clink = new CLINK;
+
+	plink->device_ip = malloc(120);
+	strncpy(plink->device_ip, device_ip, 100);
+
+	plink->device_name = malloc(120);
+	strncpy(plink->device_name, device_name, 100);
+
+	if (vxi11_open_device(plink->device_ip, plink->clink, plink->device_name) != 0) {
+		free(plink->buffer);
+		free(plink->device_name);
+		free(plink->device_ip);
+		del plink->clink;
+		del plink;
+		return NULL;
+	}
+	return plink;
 }
 
-int cmd(char *cmd)
+int icommand(PLINK *plink, char *cmd, long timeout_ms)
 {
-	/* maybe not the first bytes of buffer, same access needed */
-	long long *ret = (long long *)cmd_buffer;
-
 	if (vxi11_send(clink, cmd) < 0) return 0;
 	if (strstr(cmd, "?") != 0) {
-		return vxi11_receive(clink, (char *)ret, MAX_RESP);
+		return vxi11_receive(plink->clink, plink->buffer, plink->buffer_size, timeout_ms);
 	}
 	return 0;
 }
 
-long long resp(int index)
+long long iresponse(PLINK *plink, int index)
 {
-	/* maybe not the first bytes of buffer, same access needed */
-	long long *ret = (long long *)cmd_buffer;
+	long long *ret = (long long *)plink->buffer;
         return ret[index];
 }
 
-int close(char *device_ip)
+int idisconnect(PLINK *plink)
 {
-	vxi11_close_device(device_ip, clink);
+	vxi11_close_device(plink->device_ip, plink->clink);
+	free(plink->buffer);
+	free(plink->device_name);
+	free(plink->device_ip);
+	del plink->clink;
+	del plink;
+
 	return 0;
 }

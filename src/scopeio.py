@@ -70,7 +70,7 @@ class scopeIO():
                 for item in argv[1:]:
                         if item == '--nomeas':
                                 self.nomeas = True
-                        elif item == '--nomodes':
+			elif item == '--nomodes':
                                 self.nomodes = True
                         elif item == '--help':
                                 self.Usage()
@@ -111,30 +111,6 @@ class scopeIO():
                                         self.leftargv.append(parsed)
 
 
-        def Cmd(self,cmd,waittime,type='ASC'):
-                cmd = cmd + '\n'
-                sys.stdout.write('-')
-                sys.stdout.flush()
-                rlen = 0;
-                try:
-                        rlen = vxi11.cmd(cmd)
-                except:
-                        return 'Write timeout:' + cmd
-                sys.stdout.write('.')
-                sys.stdout.flush()
-
-                bresp = bytearray()
-                i = 0
-                while rlen >= 8:
-                        bresp.extend(pack('q',vxi11.resp(i)))
-                        i += 1
-                        rlen -= 8
-                if rlen > 0:
-                        bresp.extend(pack('q',vxi11.resp(i))[0:rlen])                
-		if type == 'ASC':
-                        return str(bresp)
-                return bresp
-        
         def Waveform(self, channels):
                 self.alldata = []
                 print('')
@@ -285,6 +261,19 @@ class scopeIO():
                                         args.append(line)
                 return args
         
+        def Cmd(self,cmd,waittime=1000,type='ASC'):
+		
+                cmd = cmd + '\n'
+                sys.stdout.write('-')
+                sys.stdout.flush()
+
+		resp = self.p.command(cmd, waittime, type)
+
+                sys.stdout.write('.')
+                sys.stdout.flush()
+		
+		return resp
+        
         def RunAll(self,cmdlineargs):
 
                 orig = self.config
@@ -302,10 +291,11 @@ class scopeIO():
                 if self.addr == '0.0.0.0':
                         self.Usage()
 
-                st = vxi11.open(self.addr,self.device)
-                if st != 0:
+		self.p = vxi11.pconn()
+                self.plink = self.p.connect(self.addr,4*1024*1024,self.device)
+                if self.plink != None:
                    print('Could not connect to scope')
-                   exit(0)
+                   return
                    
                 if self.nomodes == False:
                         if self.mode == 'RUN':
@@ -329,7 +319,9 @@ class scopeIO():
                         if self.after == 'STOP':
                                 result = self.Cmd(':STOP',10)                        
 
-                st = vxi11.close(self.addr)
+                self.p.disconnect(self.plink)
+		self.plink = None
+		del self.p
                 
 		print('')
 		if self.view != '':
