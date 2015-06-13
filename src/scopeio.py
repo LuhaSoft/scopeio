@@ -14,6 +14,8 @@ import Gnuplot, Gnuplot.funcutils
 
 import vxi11
 
+from struct import *
+
 class scopeIO():
 
         def __init__(self):
@@ -109,7 +111,7 @@ class scopeIO():
                                         self.leftargv.append(parsed)
 
 
-        def Cmd(self,cmd,waittime):
+        def Cmd(self,cmd,waittime,type='ASC'):
                 cmd = cmd + '\n'
                 sys.stdout.write('-')
                 sys.stdout.flush()
@@ -120,14 +122,19 @@ class scopeIO():
                         return 'Write timeout:' + cmd
                 sys.stdout.write('.')
                 sys.stdout.flush()
-                resp = ''
-                i = 0
-                while rlen > 0:
-                        resp = resp + vxi11.resp(i)
-                        i += 1
-                        rlen -= 1
-                return resp
 
+                bresp = bytearray()
+                i = 0
+                while rlen >= 8:
+                        bresp.extend(pack('q',vxi11.resp(i)))
+                        i += 1
+                        rlen -= 8
+                if rlen > 0:
+                        bresp.extend(pack('q',vxi11.resp(i))[0:rlen])                
+		if type == 'ASC':
+                        return str(bresp)
+                return bresp
+        
         def Waveform(self, channels):
                 self.alldata = []
                 print('')
@@ -250,12 +257,11 @@ class scopeIO():
         def Screendump(self):
                 if self.screen == False:
                         return ' '
-                result = self.Cmd(':DISPLAY:DATA?',300)[11:-3]
+                bindata = self.Cmd(':DISPLAY:DATA?',300,'BIN')[11:-3]
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + str(self.sequence)+ '-screendump-' + now + '.bmp'
 		self.sequence += 1
                 newFile = open(fname, "wb")
-                bindata=bytearray(result)
                 newFile.write(bindata)
                 newFile.close()
                 return(fname + ' ')
@@ -325,14 +331,20 @@ class scopeIO():
 
                 st = vxi11.close(self.addr)
                 
-                if self.view == '':
-                        print('')
-                        print('Files created:' + self.files)
-                else:
-                        p = pexpect.spawn(self.view + ' ' + self.files)
-                        p.wait()
-                print('')
-                        
+		print('')
+		if self.view != '':
+			try:
+                	      	p = pexpect.spawn(self.view + ' ' + self.files)
+			except:
+				print('could not start ',self.view)
+				return
+			else:
+				try:
+					p.wait()
+				except:
+					return
+			return
+		print('Files created:' + self.files)
 
 s = scopeIO()
 s.RunAll(sys.argv)

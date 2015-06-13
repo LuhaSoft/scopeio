@@ -45,16 +45,21 @@ int open(char *device_ip, char *device_name)
 
 int cmd(char *cmd)
 {
+	/* maybe not the first bytes of buffer, same access needed */
+	long long *ret = (long long *)cmd_buffer;
+
 	if (vxi11_send(clink, cmd) < 0) return 0;
 	if (strstr(cmd, "?") != 0) {
-		return vxi11_receive(clink, cmd_buffer, MAX_RESP);
+		return vxi11_receive(clink, (char *)ret, MAX_RESP);
 	}
 	return 0;
 }
 
-char resp(int offset)
+long long resp(int index)
 {
-        return cmd_buffer[offset];
+	/* maybe not the first bytes of buffer, same access needed */
+	long long *ret = (long long *)cmd_buffer;
+        return ret[index];
 }
 
 int close(char *device_ip)
