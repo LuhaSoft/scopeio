@@ -21,7 +21,7 @@ class conn():
                         ind += 1
                         rlen -= 8
                 if rlen < 0:
-                        resp = resp[:rlen]
+                        bresp = bresp[:rlen]
                 if returntype == 'ASC':
                         return str(bresp)
                 return bresp
