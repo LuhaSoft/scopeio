@@ -117,7 +117,7 @@ class scopeIO():
                 self.alldata = []
                 self.rigol.command(':WAVEFORM:FORMAT ASCII')
                 self.rigol.command(':WAVEFORM:POINT:MODE NORMAL')
-                self.timescale = float(self.rigol.command(':TIMEBASE:MAIN:SCALE?')[:-3])
+                self.timescale = float(self.rigol.command(':TIMEBASE:MAIN:SCALE?'))
                 self.min_value = 1e10
                 self.max_value = -1e10
                 while channels != '':
@@ -141,7 +141,7 @@ class scopeIO():
 
 	def OneMeas(self,channel,meas):
         	self.rigol.command(':MEASURE:ITEM:' + meas + ' ' + channel)
-		resp = float(self.rigol.command(':MEASURE:ITEM? ' + meas + ',' + channel)[:-3])
+		resp = float(self.rigol.command(':MEASURE:ITEM? ' + meas + ',' + channel))
                 return '  ' + meas + '=' + str(resp).format('%.2G')
 		
         def Meas(self, channels):
@@ -247,7 +247,7 @@ class scopeIO():
 		self.Info('started screendump, this takes many seconds')
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + str(self.sequence)+ '-screendump-' + now + '.bmp'
-                bindata = self.rigol.command(':DISPLAY:DATA?',30000,'BIN')[11:-7]
+                bindata = self.rigol.command(':DISPLAY:DATA?',30000,'BIN')[11:-3]
                 newFile = open(fname, "wb")
                 newFile.write(bindata)
                 newFile.close()
