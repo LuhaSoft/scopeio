@@ -31,6 +31,8 @@ Controlling the oscilloscope is possible, so any gui could be build over the vxi
 
 <p>Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python eight bytes in one call, but anyway the screendump at least takes time on the scope much more than receiving the result.</p>
 
+<p>Starting from version v0.4 there is also a class interface python module vxi11conn, which makes things easier and now also multiple instrument connections should be supported as the need data separation is done. How to use this new interface is describe at the end of this page.</p>
+
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h1>
 
@@ -118,6 +120,55 @@ Starting from release v0.4-beta the speed is improved to 10/6 seconds without me
 Screendump:  &lt;prefix&gt;-&lt;sequencenumber&gt;-screendump-&lt;date&gt;-&lt;time&gt;.bmp
 
 Measurement: &lt;prefix&gt;-&lt;sequencenumber&gt;-&lt;channels&gt;-&lt;date&gt;-&lt;time&gt;.[png | svg]
+
+</code></pre>
+
+<h1>
+<a id="vxi11conn-python-module-usage" class="anchor" href="#vxi11conn-python-module-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>vxi11conn python module usage</h1>
+
+<pre><code>
+import vxi11conn
+
+myscope = vxi11conn.conn()
+
+connected = myscope.connect('192.168.1.112', 10000000, 'Rigol_DS1054'))
+if not connected:
+  exit(0)
+
+resp = myscope.command('*IDN?')
+print(resp)
+
+resp = myscope.command('DISPLAY:DATA?', 10000, 'BIN')[11:-3]
+# response is screendump in binary data, write to binary file *.bmp 
+
+myscope.disconnect()
+
+del myscope
+
+
+</code></pre>
+
+<h1>
+<a id="vxi11conn-python-module-in-used-manually" class="anchor" href="#vxi11conn-python-module-in-used-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>vxi11conn python module in used manually</h1>
+
+<pre><code>
+$ python
+Python 2.7.9 (default, Apr  2 2015, 15:33:21) 
+[GCC 4.9.2] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+&gt;&gt;&gt; import vxi11conn
+&gt;&gt;&gt; rigol=vxi11conn.conn()
+&gt;&gt;&gt; rigol.connect('192.168.1.117')
+True
+&gt;&gt;&gt; rigol.command('*IDN?')
+'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00'
+&gt;&gt;&gt; rigol.command('*IDN?', 1000, 'BIN')
+bytearray(b'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00')
+&gt;&gt;&gt; rigol.disconnect()
+&gt;&gt;&gt; del rigol
+&gt;&gt;&gt; exit(0)
+$
+
 
 </code></pre>
 
