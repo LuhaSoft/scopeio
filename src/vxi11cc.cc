@@ -29,7 +29,7 @@
  */
 
 #include "vxi11_1.10/vxi11_user.h"
-#include "vxi11cc_python.h"
+#include "vxi11cc.h"
 
 PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 {

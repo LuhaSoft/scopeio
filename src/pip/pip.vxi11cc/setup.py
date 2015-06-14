@@ -8,9 +8,9 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='vxi11',
+    name='vxi11cc',
     version='0.3',
-    packages=['vxi11'],
+    packages=['vxi11cc'],
     include_package_data=True,
     license='GNU General Public License',  # example license
     description='A simple library for instrument control.',

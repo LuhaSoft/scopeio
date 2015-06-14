@@ -1,5 +1,5 @@
 /* vxi11cc_python.i */
- %module vxi11
+ %module vxi11cc
  %{
 
 /* local version to avoid complexity for swig */

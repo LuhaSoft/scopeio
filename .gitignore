@@ -5,9 +5,12 @@
 *.so
 vxi11_1.10*
 *.pyc
-vxi11.py
+vxi11cc.py
 *.cxx
-src/pip/vxi11/dist/
-src/pip/vxi11/vxi11.egg-info/
-src/pip/vxi11conn/dist/
-src/pip/vxi11conn/vxi11conn.egg-info/
+src/pip/pip.vxi11cc/dist/
+src/pip/pip.vxi11cc/vxi11cc.egg-info/
+src/pip/pip.vxi11cc/vxi11cc/
+src/pip/pip.vxi11conn/dist/
+src/pip/pip.vxi11conn/vxi11conn.egg-info/
+src/pip/pip.vxi11conn/vxi11conn/
+

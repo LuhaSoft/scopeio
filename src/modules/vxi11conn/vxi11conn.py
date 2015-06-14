@@ -1,5 +1,5 @@
 from struct import pack
-from vxi11 import *
+from vxi11cc import *
 
 class conn():
         def __init__(self):

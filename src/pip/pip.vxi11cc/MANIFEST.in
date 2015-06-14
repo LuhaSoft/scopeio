@@ -1,4 +1,4 @@
 include LICENSE
 include README.rst
-include vxi11/_vxi11.so
+include vxi11cc/_vxi11cc.so
 

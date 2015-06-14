@@ -4,8 +4,8 @@ Stucture of python interfaces is following:
 
 vxi11 is python module, contents are:
 
-	_vxi11.so 
-        =========       
+	_vxi11cc.so 
+        ============       
 		- is the shared library
 		- build from source vxi11cc_python.cc and vxi11cc_python.h
 		- swig definitions in vxi11cc_python.i
@@ -15,14 +15,14 @@ vxi11 is python module, contents are:
     			- long long iresponse(PLINK *plink,long index);
     			- int idisconnect(PLINK *plink);
   			these calls are not supposed to be used directly, but via class vxi11conn.conn
-	vxi11.py
-        ========
+	vxi11cc.py
+        ===========
 		- swig generated inteface to shared module
 
 vxi11conn is another python module, contents are:
 
 from struct import pack
-from vxi11 import *
+from vxi11cc import *
 
 class conn():
         def __init__(self):
