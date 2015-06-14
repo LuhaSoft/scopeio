@@ -21,7 +21,6 @@ class scopeIO():
                 self.nomeas = False
                 self.view   = ''
                 self.screen = False
-                self.screenmode = 'RUN'
                 self.outformat = '.png'
                 self.leftargv = []
                 self.files = ''
@@ -248,7 +247,7 @@ class scopeIO():
 		self.Info('started screendump, this takes many seconds')
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + str(self.sequence)+ '-screendump-' + now + '.bmp'
-                bindata = self.rigol.command(':DISPLAY:DATA?',30000,'BIN')[11:-3]
+                bindata = self.rigol.command(':DISPLAY:DATA?',30000,'BIN')[11:-7]
                 newFile = open(fname, "wb")
                 newFile.write(bindata)
                 newFile.close()
@@ -297,12 +296,10 @@ class scopeIO():
                    self.Info('Could not connect to scope')
                    return
                    
-                if self.nomodes == False:
-                        if self.mode == 'RUN':
-                                result = self.Cmd(':RUN',10)
-                        if self.mode == 'STOP':
-                                result = self.Cmd(':STOP',10)                        
-                
+                if self.nomodes == False and self.mode != '':
+			self.Info('set scope during capture mode to ' + self.mode)
+                        self.rigol.command(':'+self.mode)
+
                 if self.screen == True:
                         file = self.Screendump()
                         if file != '':
@@ -313,11 +310,9 @@ class scopeIO():
                         if file != '':
                                 self.files = self.files + file
 
-                if self.nomodes == False:
-                        if self.after == 'RUN':
-                                result = self.Cmd(':RUN',10)
-                        if self.after == 'STOP':
-                                result = self.Cmd(':STOP',10)                        
+                if self.nomodes == False and self.after != '':
+			self.Info('set scope after capture mode to ' + self.after)
+                        self.rigol.command(':' + self.after)
 
                 self.rigol.disconnect()
 		del self.rigol
