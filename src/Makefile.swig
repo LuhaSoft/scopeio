@@ -38,11 +38,13 @@ TAGS: $(wildcard *.c) $(wildcard *.h) $(wildcard *.cc)
 	etags $^	
 
 pip/pip.vxi11/dist/vxi11-03.tar.gz: modules/vxi11/__init__.py _vxi11.so vxi11.py
+	mkdir -p pip/pip.vxi11/vxi11
 	cp modules/vxi11/* pip/pip.vxi11/vxi11/
 	cp _vxi11.so vxi11.py pip/pip.vxi11/vxi11/
 	(cd pip/pip.vxi11; python setup.py sdist)
 
 pip/pip.vxi11conn/dist/vxi11conn-03.tar.gz: modules/vxi11conn/__init__.py modules/vxi11conn/vxi11conn.py
+	mkdir -p pip/pip.vxi11conn/vxi11conn
 	cp modules/vxi11conn/* pip/pip.vxi11conn/vxi11conn/
 	(cd pip/pip.vxi11conn; python setup.py sdist)
 	
