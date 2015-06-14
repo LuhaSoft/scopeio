@@ -8,6 +8,8 @@ Also the scope does make screendump in bmp format, just need to store it. And th
 
 Starting from version v0.3 the inteface between vxi11 code and python is converted to be shared library created by swig. So there is python module called vxi11 with very primitive first interface, just enough to make single instrument handling work. But this way system is much faster (waveform take is less than one second mithout measurements) and also much less error prone. The speed could still be improved easily as data is read from python eight bytes in one call, but anyway the screendump at least takes time on the scope much more than receiving the result.
 
+Starting from version v0.4 there is also a class interface python module vxi11conn, which makes things easier and now also multiple instrument connections should be supported as the need data separation is done. How to use this new interface is describe at the end of this page.
+
 # How it works
 
 It uses github project https://github.com/applied-optics/vxi11 as transport. The higher level is python code written for the project, it uses python-pexpect, python-numpy and python-gnuplot packages at least. The interface between vxi11 C/C++ code and python is impemented by swig and for now it is very basic one. The vxi11 code and pythoin interface are buils as python module and it is installed with pip. The capture example program is installed in /usr/local/bin by default.
@@ -93,5 +95,54 @@ Note that scalings vary as different channels are shown, because the measurement
 Screendump:  <prefix>-<sequencenumber>-screendump-<date>-<time>.bmp
 
 Measurement: <prefix>-<sequencenumber>-<channels>-<date>-<time>.[png | svg]
+
+```
+
+# vxi11conn python module usage
+
+```
+
+import vxi11conn
+
+myscope = vxi11conn.conn()
+
+connected = myscope.connect('192.168.1.112', 10000000, 'Rigol_DS1054'))
+if not connected:
+  exit(0)
+
+resp = myscope.command('*IDN?')
+print(resp)
+
+resp = myscope.command('DISPLAY:DATA?', 10000, 'BIN')[11:-3]
+# response is screendump in binary data, write to binary file *.bmp 
+
+myscope.disconnect()
+
+del myscope
+
+
+```
+
+# vxi11conn python module in used manually
+
+```
+
+$ python
+Python 2.7.9 (default, Apr  2 2015, 15:33:21) 
+[GCC 4.9.2] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import vxi11conn
+>>> rigol=vxi11conn.conn()
+>>> rigol.connect('192.168.1.117')
+True
+>>> rigol.command('*IDN?')
+'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00'
+>>> rigol.command('*IDN?', 1000, 'BIN')
+bytearray(b'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00')
+>>> rigol.disconnect()
+>>> del rigol
+>>> exit(0)
+$
+
 
 ```
