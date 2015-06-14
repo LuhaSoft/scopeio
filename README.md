@@ -12,9 +12,11 @@ Starting from version v0.5 there is also a class interface python module vxi11co
 
 # How it works
 
-It uses github project https://github.com/applied-optics/vxi11 as transport. The higher level is python code written for the project, it uses python-pexpect, python-numpy and python-gnuplot packages at least. The interface between vxi11 C/C++ code and python is impemented by swig and for now it is very basic one. The vxi11 code and pythoin interface are buils as python module and it is installed with pip. The capture example program is installed in /usr/local/bin by default.
+It uses github project https://github.com/applied-optics/vxi11 as transport. That project has also a python interface module named vxi11, but it seems to lack handling of binary data, so screendump would not work with that interfaces. 
 
-Different from other similar programs this stores the output to files and only optionally shows them by desired external program. But the capture python script is just an example, you could control all features of the scope and maybe other scopes and instruments as well.
+The python modules vxi11cc and vxi11conn and scopeio.py script are written for this repository. Python code in scopeio.py uses python-pexpect, python-numpy and python-gnuplot packages at least. The interface between vxi11 C/C++ code and python is impemented by swig in python module vxi11cc. The higher level python module vxi11conn uses just the vxi11cc module. The python modules are installed by pip. The capture example program is installed as /usr/local/bin/scopeio.py by default.
+
+Different from other similar programs scopeio.py stores the output to files and only optionally shows them by desired external program. But the capture python script is just an example, you could control all features of the scope and maybe other scopes and instruments as well.
 
 # Used formats
 
