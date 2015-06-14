@@ -4,48 +4,78 @@ Stucture of python interfaces is following:
 
 vxi11 is python module, contents are:
 
-	- _vxi11cc.so 
-        =============       
+	_vxi11.so 
+        =========       
 		- is the shared library
 		- build from source vxi11cc_python.cc and vxi11cc_python.h
 		- swig definitions in vxi11cc_python.i
-		- contains following functions:
-	    		- c++: PLINK *iconnect(char *device_ip, long buffersize, char *device_name);
-				=> python call: plink = iconnect('a.b.c.d','name')
-    			- c++: int icommand(PLINK *plink, char *command, long timeout_ms);
-				=> python call: blen = icommand(plink,'*IDN?', 1000)
-    			- c++: long long iresponse(PLINK *plink,long index);
-				=> python calls: value = iresponse(plink, index)
-    			- c++: int idisconnect(PLINK *plink);
-				=> python calls: idisconnect(plink)
-  			these calls are not supposed to be used directly, but via class pconn
+		- contains following functions, c++:
+	    		- PLINK *iconnect(char *device_ip, long buffersize, char *device_name);
+    			- int icommand(PLINK *plink, char *command, long timeout_ms);
+    			- long long iresponse(PLINK *plink,long index);
+    			- int idisconnect(PLINK *plink);
+  			these calls are not supposed to be used directly, but via class vxi11conn.conn
+	vxi11.py
+        ========
+		- swig generated inteface to shared module
 
-	class pconn(self):
-        ==================
-        	def connect(self, device_ip, buffer_size=1024*1024, device_name=''):
-	   		...
-           		return(connected)
-		def command(self, command, timeout_ms=1000, mode='ASC'):
-            		...
-            		return(ASCII or binary response)
-        	def disconnect(self):
-            		return
+vxi11conn is another python module, contents are:
 
+from struct import pack
+from vxi11 import *
+
+class conn():
+        def __init__(self):
+                self.plink = None
+        def connect(self,device_ip,buffer_size=1024*1024,device_name=''):
+                self.plink = iconnect(device_ip,buffer_size,device_name)
+                if self.plink == None:
+                        return(False)
+                return(True )       
+        def command(self, cmd, timeout_ms=1000, returntype='ASC'):
+                if self.plink == None:
+                        return(0)
+                rlen = icommand(self.plink, cmd, timeout_ms)
+                bresp = bytearray()
+                ind = 0
+                while rlen > 0:
+                        resp = pack('q',iresponse(self.plink,ind))
+                        bresp.extend(resp)
+                        ind += 1
+                        rlen -= 8
+                if rlen < 0:
+                        resp = resp[:rlen]
+                if returntype == 'ASC':
+                        return str(bresp)
+                return bresp
+        def disconnect(self):
+                idisconnect(self.plink)
+                self.plink = None
+	def version():
+		return 'v0.3';
+                
 
 
 So the final python code using this is:
 =======================================
 
-       p = vxi11.pconn()
-       pc = p.connect('a.b.c.d')
-       if pc == None:
+       import vxi11conn
+
+       myscope = vxi11conn.conn()
+
+       connected = myscope.connect('192.168.1.112', 10000000, 'Rigol_DS1054'))
+       if not connected:
 	   exit(0)
-       resp = p.command(pc, '*IDN?')
+
+       resp = myscope.command('*IDN?')
        print(resp)
-       resp = p.command(pc, 'DISPLAY:DATA?', 10000, 'BIN')
-       # response is binary data
-       p.disconnect(pc)
-       del p
+
+       resp = myscope.command('DISPLAY:DATA?', 10000, 'BIN')[11:-3]
+       # response is screendump in binary data, write to binary file *.bmp 
+
+       myscope.disconnect()
+
+       del myscope
 
 
 

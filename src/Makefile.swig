@@ -11,8 +11,7 @@ CC = c++
 
 .PHONY : install clean dist distclean
 
-all: _vxi11.so
-
+all: pip/pip.vxi11/dist/vxi11-03.tar.gz pip/pip.vxi11conn/dist/vxi11conn-03.tar.gz
 
 _vxi11.so: vxi11cc_python_wrap.o vxi11cc_python.o vxi11_1.10/vxi11_user.o vxi11_1.10/vxi11_clnt.o vxi11_1.10/vxi11_xdr.o
 	c++ -shared -fPIC -o $@ $^
@@ -38,14 +37,22 @@ vxi11_1.10/vxi11.x::
 TAGS: $(wildcard *.c) $(wildcard *.h) $(wildcard *.cc)
 	etags $^	
 
+pip/pip.vxi11/dist/vxi11-03.tar.gz: modules/vxi11/__init__.py _vxi11.so vxi11.py
+	cp modules/vxi11/* pip/pip.vxi11/vxi11/
+	cp _vxi11.so vxi11.py pip/pip.vxi11/vxi11/
+	(cd pip/pip.vxi11; python setup.py sdist)
+
+pip/pip.vxi11conn/dist/vxi11conn-03.tar.gz: modules/vxi11conn/__init__.py modules/vxi11conn/vxi11conn.py
+	cp modules/vxi11conn/* pip/pip.vxi11conn/vxi11conn/
+	(cd pip/pip.vxi11conn; python setup.py sdist)
 	
-install:: _vxi11cc.so vxi11cc.py vxi11pconn.py scopeio.py
-	cp _vxi11cc.so vxi11cc.py pip/vxi11/
-	cp vx11pconn.py pip/vxi11/__init__.py
-	(cd pip; python setup.py sdist)
-	(cd pip/dist; sudo pip install --upgrade vxi11-0.3.tar.gz)
+install:: pip/pip.vxi11/dist/vxi11-03.tar.gz pip/pip.vxi11conn/dist/vxi11conn-03.tar.gz scopeio.py
 	sudo install -D scopeio.py $(PREFIX)/bin/
+	(cd pip/pip.vxi11; sudo pip install --upgrade dist/vxi11-0.3.tar.gz)
+	(cd pip/pip.vxi11conn; sudo pip install --upgrade dist/vxi11conn-0.3.tar.gz)
 	
 clean:
 	rm -rf vxi11_1.10/
-	rm -f *.o *.so *.pyc vxi11cc.py vxi11cc_python_wrap.cxx pip/vxi11/*
+	rm -rf pip/pip.vxi11/vxi11/*
+	rm -rf pip/pip.vxi11conn/vxi11conn/*
+	rm -f *.o *.so *.pyc vxi11.py vxi11cc_python_wrap.cxx

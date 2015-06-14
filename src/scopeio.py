@@ -12,9 +12,7 @@ import pexpect
 from numpy import *
 import Gnuplot, Gnuplot.funcutils
 
-import vxi11
-
-from struct import *
+import vxi11conn
 
 class scopeIO():
 
@@ -110,22 +108,24 @@ class scopeIO():
                                 if parsed != '':
                                         self.leftargv.append(parsed)
 
+	def Info(self, text):
+		print('measurement' + str(self.sequence) + ':INFO: ' + text)
+	def Error(self,text):
+		print('measurement' + str(self.sequence) + ':ERROR: ' + text)
 
         def Waveform(self, channels):
+		self.Info('getting waveforms')
                 self.alldata = []
-                print('')
-                result = self.Cmd(':WAVEFORM:FORMAT ASCII', 20)
-                result = self.Cmd(':WAVEFORM:POINT:MODE NORMAL', 20)
-                result = self.Cmd(':TIMEBASE:MAIN:SCALE?', 20)
-                self.timescale = float(result)
+                self.rigol.command(':WAVEFORM:FORMAT ASCII')
+                self.rigol.command(':WAVEFORM:POINT:MODE NORMAL')
+                self.timescale = float(self.rigol.command(':TIMEBASE:MAIN:SCALE?')[:-3])
                 self.min_value = 1e10
                 self.max_value = -1e10
                 while channels != '':
-                        print('')
                         chnow = 'CHAN' + channels[0]
                         channels = channels[1:]
-                        result = self.Cmd(':WAVEFORM:SOURCE ' + chnow,20)
-                        data = self.Cmd(':WAVEFORM:DATA?',180)[11:]
+                        self.rigol.command(':WAVEFORM:SOURCE ' + chnow)
+                        data = self.rigol.command(':WAVEFORM:DATA?',10000)[11:-3]
                         data = data.split(',')
                         fdata = []
                         for item in data:
@@ -140,33 +140,29 @@ class scopeIO():
                                 fdata.append(value)
                         self.alldata.append(fdata)
 
+	def OneMeas(self,channel,meas):
+        	self.rigol.command(':MEASURE:ITEM:' + meas + ' ' + channel)
+		resp = float(self.rigol.command(':MEASURE:ITEM? ' + meas + ',' + channel)[:-3])
+                return '  ' + meas + '=' + str(resp).format('%.2G')
+		
         def Meas(self, channels):
+		self.Info('getting measurements');
                 self.meas=[]
                 while channels != '':
-                        print('')
                         chnow = 'CHAN' + channels[0]
                         channels = channels[1:]
                         chmeas = chnow
                         if self.nomeas == False:
-                                result = self.Cmd(':MEASURE:ITEM:VPP ' + chnow,20)
-                                result = self.Cmd(':MEASURE:ITEM? VPP,' + chnow,20)
-                                chmeas = chmeas + '  VPP:' + str(float(result))
-                                result = self.Cmd(':MEASURE:ITEM:VMAX ' + chnow,20)
-                                result = self.Cmd(':MEASURE:ITEM? VMAX,' + chnow,20)
-                                chmeas = chmeas + '  VMAX:' + str(float(result))
-                                result = self.Cmd(':MEASURE:ITEM:VMIN ' + chnow,20)
-                                result = self.Cmd(':MEASURE:ITEM? VMIN,' + chnow,20)
-                                chmeas = chmeas + '  VMIN:' + str(float(result))
-                                result = self.Cmd(':MEASURE:ITEM:FREQ ' + chnow,20)
-                                result = self.Cmd(':MEASURE:ITEM? FREQ,' + chnow,20)
-                                chmeas = chmeas + '  FREQUENCY:' + str(float(result))
+				chmeas = chmeas + self.OneMeas(chnow, 'VPP')
+				chmeas = chmeas + self.OneMeas(chnow, 'VMAX')
+				chmeas = chmeas + self.OneMeas(chnow, 'VMIN')
+				chmeas = chmeas + self.OneMeas(chnow, 'FREQUENCY')
                         self.meas.append(chmeas)
                 
         def Graph(self,channels):         
-
+		self.Info('making graph')
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + str(self.sequence) + '-' + channels + '-' + now + self.outformat
-		self.sequence += 1
                 tu = 's'
                 if self.timescale < 1e-6:
                         self.timescale = self.timescale * 1e9
@@ -188,7 +184,6 @@ class scopeIO():
                 i = 0
                 gdata=[]
                 while channels != '':
-                        print('-.')
                         channel = 'CHAN' + channels[0]
                         channels = channels[1:]
                         gdata.append(Gnuplot.Data(self.alldata[i],with_='lines',title=self.meas[i]))
@@ -226,21 +221,40 @@ class scopeIO():
                 return str(fname + ' ')
 
         def RunOne(self, channels):
-                self.Waveform(channels)
-                self.Meas(channels)
-                return self.Graph(channels)
+		self.Info('started')
+		onchannels=''
+                while channels != '':
+                        chnow = 'CHAN' + channels[0]
+                        channels = channels[1:]
+			online = self.rigol.command(':' + chnow + ':DISPLAY?')[0]
+			if online != '1':
+				self.Error(chnow + ' offline, skipping channel')
+			else:
+				onchannels = onchannels + chnow[4:]
+		if onchannels == '':
+			self.Error('no channels online, skipping')
+			self.sequence += 1
+			return ''		
+                self.Waveform(onchannels)
+                self.Meas(onchannels)
+                ret = self.Graph(onchannels)
+		self.Info('finished')
+		self.sequence += 1
+		return ret
 
         def Screendump(self):
                 if self.screen == False:
                         return ' '
-                bindata = self.Cmd(':DISPLAY:DATA?',300,'BIN')[11:-3]
+		self.Info('started screendump, this takes many seconds')
                 now = time.strftime('%d.%m.%Y-%H.%M.%S')
                 fname = self.prefix + '-' + str(self.sequence)+ '-screendump-' + now + '.bmp'
-		self.sequence += 1
+                bindata = self.rigol.command(':DISPLAY:DATA?',30000,'BIN')[11:-3]
                 newFile = open(fname, "wb")
                 newFile.write(bindata)
                 newFile.close()
-                return(fname + ' ')
+		self.Info('screendump finished')
+		self.sequence += 1
+                return fname + ' '
 
         def ReadConfig(self,filename, need_exist):
                 args=['dummy']
@@ -250,7 +264,7 @@ class scopeIO():
                         newFile = open(filename, "r") 
                 except:
                         if need_exist:
-                                print('config file ' + filename + ' not found')
+                                self.Error('config file ' + filename + ' not found')
                         return args
                 all = newFile.read(1000000)
                 newFile.close()
@@ -260,19 +274,6 @@ class scopeIO():
                                 if line[0] != '#':
                                         args.append(line)
                 return args
-        
-        def Cmd(self,cmd,waittime=1000,type='ASC'):
-		
-                cmd = cmd + '\n'
-                sys.stdout.write('-')
-                sys.stdout.flush()
-
-		resp = self.p.command(cmd, waittime, type)
-
-                sys.stdout.write('.')
-                sys.stdout.flush()
-		
-		return resp
         
         def RunAll(self,cmdlineargs):
 
@@ -291,10 +292,9 @@ class scopeIO():
                 if self.addr == '0.0.0.0':
                         self.Usage()
 
-		self.p = vxi11.pconn()
-                self.plink = self.p.connect(self.addr,4*1024*1024,self.device)
-                if self.plink != None:
-                   print('Could not connect to scope')
+		self.rigol = vxi11conn.conn()
+                if not self.rigol.connect(self.addr,4000000,self.device):
+                   self.Info('Could not connect to scope')
                    return
                    
                 if self.nomodes == False:
@@ -319,16 +319,14 @@ class scopeIO():
                         if self.after == 'STOP':
                                 result = self.Cmd(':STOP',10)                        
 
-                self.p.disconnect(self.plink)
-		self.plink = None
-		del self.p
+                self.rigol.disconnect()
+		del self.rigol
                 
-		print('')
 		if self.view != '':
 			try:
                 	      	p = pexpect.spawn(self.view + ' ' + self.files)
 			except:
-				print('could not start ',self.view)
+				self.Info('could not start ',self.view)
 				return
 			else:
 				try:

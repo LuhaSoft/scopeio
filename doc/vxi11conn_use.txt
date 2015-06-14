@@ -1,0 +1,16 @@
+$ python
+Python 2.7.9 (default, Apr  2 2015, 15:33:21) 
+[GCC 4.9.2] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import vxi11conn
+>>> rigol=vxi11conn.conn()
+>>> rigol.connect('192.168.1.117')
+True
+>>> rigol.command('*IDN?')
+'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00'
+>>> rigol.command('*IDN?', 1000, 'BIN')
+bytearray(b'RIGOL TECHNOLOGIES,DS1104Z,DS1ZA171205656,00.04.02.SP4\n\x00')
+>>> rigol.disconnect()
+>>> del rigol
+>>> exit(0)
+$

@@ -29,16 +29,16 @@
  */
 
 #include "vxi11_1.10/vxi11_user.h"
-#include "vxi11_python.h"
+#include "vxi11cc_python.h"
 
-CLINK *iconnect(char *device_ip, buffer_size, char *device_name)
+PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 {
 	char *cp;
 	PLINK *plink;
 
 	if (device_ip == NULL) return NULL;
 
-	cp  = malloc(buffer_size);
+	cp  = (char *)malloc(buffer_size);
 	if (cp == NULL) return NULL;
 
 	plink = new PLINK;
@@ -48,18 +48,18 @@ CLINK *iconnect(char *device_ip, buffer_size, char *device_name)
 
 	plink->clink = new CLINK;
 
-	plink->device_ip = malloc(120);
+	plink->device_ip = (char *)malloc(120);
 	strncpy(plink->device_ip, device_ip, 100);
 
-	plink->device_name = malloc(120);
+	plink->device_name = (char *)malloc(120);
 	strncpy(plink->device_name, device_name, 100);
 
 	if (vxi11_open_device(plink->device_ip, plink->clink, plink->device_name) != 0) {
 		free(plink->buffer);
 		free(plink->device_name);
 		free(plink->device_ip);
-		del plink->clink;
-		del plink;
+		delete plink->clink;
+		delete plink;
 		return NULL;
 	}
 	return plink;
@@ -67,7 +67,7 @@ CLINK *iconnect(char *device_ip, buffer_size, char *device_name)
 
 int icommand(PLINK *plink, char *cmd, long timeout_ms)
 {
-	if (vxi11_send(clink, cmd) < 0) return 0;
+	if (vxi11_send(plink->clink, cmd) < 0) return 0;
 	if (strstr(cmd, "?") != 0) {
 		return vxi11_receive(plink->clink, plink->buffer, plink->buffer_size, timeout_ms);
 	}
@@ -86,8 +86,8 @@ int idisconnect(PLINK *plink)
 	free(plink->buffer);
 	free(plink->device_name);
 	free(plink->device_ip);
-	del plink->clink;
-	del plink;
+	delete plink->clink;
+	delete plink;
 
 	return 0;
 }

@@ -7,5 +7,7 @@ vxi11_1.10*
 *.pyc
 vxi11.py
 *.cxx
-src/pip/dist/
-src/pip/vxi11.egg-info/
+src/pip/vxi11/dist/
+src/pip/vxi11/vxi11.egg-info/
+src/pip/vxi11conn/dist/
+src/pip/vxi11conn/vxi11conn.egg-info/
