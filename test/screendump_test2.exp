@@ -1,0 +1,99 @@
+puts "Test: Screendump test 1"
+set ok {
+measurement1:INFO: set scope during capture mode to STOP
+measurement1:INFO: started screendump, this takes many seconds
+measurement1:INFO: screendump finished
+measurement2:INFO: set scope after capture mode to RUN
+Files created:scope-1-screendump-[0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+.bmp
+}
+
+puts "Run:"
+set timeout 30
+spawn scopeio.py --screen --addr=192.168.1.117 --mode=STOP --after=RUN
+
+puts "Output:"
+expect {
+	eof {
+		set got $expect_out(buffer)
+	}
+	timeout {
+		set got "timeout"
+	}
+}
+
+puts "Tests:"
+
+set ok [split $ok '\n']
+set ok [lreplace $ok 0 0]
+set ok [lreplace $ok end end]
+
+set got [split $got '\n']
+set got [lreplace $got end end]
+
+set ::passed 0
+set ::failed 0
+
+proc pass {info} {
+    puts "PASS: $info"
+    incr ::passed
+}
+
+proc fail {info expected got} {
+    puts "FAIL: $info"
+    if {$expected != ""} {
+	puts "  expected: $expected"
+    }
+    puts "       got: $got"
+    incr ::failed
+}
+
+set i 1
+foreach iok $ok igot $got {
+	set igot [string range $igot 0 end-1]
+	set matched ""
+	set cmp [regexp -line -- $iok $igot matched]
+	if {$cmp == 1} {
+		pass "Output line $i"
+	} else {
+	        fail "Output line $i" $iok $igot
+	}		
+	incr i
+}
+
+set file [string range [lindex $got end] 14 end-2]	
+set oksize 1152054
+set filesize [file size $file]
+if {$oksize == $filesize} {
+	pass "Screendump filesize"
+} else {
+	fail "Screendump filesize" $oksize $filesize
+}
+
+set ok "$file: PC bitmap, Windows 3.x format, 800 x 480 x 24"
+if {[catch {set filetype [eval exec file $file]} err]} {
+	incr failed
+	fail "Screendump filetype" "" $err
+} else {
+	if {[regexp -line -- $ok $filetype]} {
+		pass "Screendump filetype"
+	} else {
+		fail "Screendump filetype" $ok $filetype 
+	}
+}
+
+set ok "convert:"
+if {[catch {set fileformat "convert:[eval exec convert $file ok.png]"} err]} {
+	fail "Screendump fileformat" "" $err
+} else {
+	if {[regexp -line -- $ok $fileformat]} {
+		pass "Screendump fileformat"
+	} else {
+                fail "Screendump fileformat" $ok $fileformat
+	}
+}
+
+file delete $file
+file delete ok.png
+   
+puts "Result: Passed $::passed Failed $::failed"
+

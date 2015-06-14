@@ -1,0 +1,114 @@
+puts "Test: Measurement test 1 (needs ch1/ch2 on)"
+set ok {
+measurement1:INFO: set scope during capture mode to STOP
+measurement1:INFO: started
+measurement1:INFO: getting waveforms
+measurement1:INFO: getting measurements
+measurement1:INFO: making graph
+measurement1:INFO: finished
+measurement2:INFO: started
+measurement2:INFO: getting waveforms
+measurement2:INFO: getting measurements
+measurement2:INFO: making graph
+measurement2:INFO: finished
+measurement3:INFO: started
+measurement3:INFO: getting waveforms
+measurement3:INFO: getting measurements
+measurement3:INFO: making graph
+measurement3:INFO: finished
+measurement4:INFO: started
+measurement4:INFO: getting waveforms
+measurement4:INFO: getting measurements
+measurement4:INFO: making graph
+measurement4:INFO: finished
+measurement5:INFO: set scope after capture mode to RUN
+Files created:scope-1-12-[0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+.png scope-2-1-[0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+.png scope-3-2-[0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+.png scope-4-12-[0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+.png
+}
+
+puts "Run:"
+set timeout 30
+spawn scopeio.py --noscreen --addr=192.168.1.117 12 1 2 12 --mode=STOP --after=RUN
+
+puts "Output:"
+expect {
+	eof {
+		set got $expect_out(buffer)
+	}
+	timeout {
+		set got "timeout"
+	}
+}
+
+puts "Tests:"
+
+set ok [split $ok '\n']
+set ok [lreplace $ok 0 0]
+set ok [lreplace $ok end end]
+
+set got [split $got '\n']
+set got [lreplace $got end end]
+
+set ::passed 0
+set ::failed 0
+
+proc pass {info} {
+    puts "PASS: $info"
+    incr ::passed
+}
+
+proc fail {info expected got} {
+    puts "FAIL: $info"
+    if {$expected != ""} {
+	puts "  expected: $expected"
+    }
+    puts "       got: $got"
+    incr ::failed
+}
+
+set i 1
+foreach iok $ok igot $got {
+	set igot [string range $igot 0 end-1]
+	set matched ""
+	set cmp [regexp -line -- $iok $igot matched]
+	if {$cmp == 1} {
+		pass "Output line $i"
+	} else {
+	        fail "Output line $i" $iok $igot
+	}		
+	incr i
+}
+
+set files [split [string range [lindex $got end] 14 end-2] " "]
+
+foreach file $files { 
+
+    set ok "$file: PNG image data, 1000 x 640, 8-bit colormap, non-interlaced"
+    if {[catch {set filetype [eval exec file $file]} err]} {
+	incr failed
+	fail "Measurement filetype" "" $err
+    } else {
+	if {[regexp -line -- $ok $filetype]} {
+	    pass "Measurement filetype"
+	} else {
+	    fail "Measurement filetype" $ok $filetype 
+	}
+    }
+
+    set ok "convert:"
+    if {[catch {set fileformat "convert:[eval exec convert $file ok.jpg]"} err]} {
+	fail "Measurement fileformat" "" $err
+    } else {
+	if {[regexp -line -- $ok $fileformat]} {
+	    pass "Measurement fileformat"
+	} else {
+	    fail "Measurement fileformat" $ok $fileformat
+	}
+    }
+
+    file delete $file
+    file delete ok.jpg
+}
+
+puts "Result: Passed $::passed Failed $::failed"
+
+
