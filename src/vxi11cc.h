@@ -1,9 +1,9 @@
 typedef struct {
-	CLINK  *clink;
-	char   *buffer;
-	long   buffer_size;
-	char   *device_ip;
-	char   *device_name;
+	VXI11_CLINK  *clink;
+	char         *buffer;
+	long          buffer_size;
+	char         *device_ip;
+	char         *device_name;
 } PLINK;
 
 PLINK      *iconnect(char *device_ip, long buffer_size, char *device_name);

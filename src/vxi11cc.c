@@ -28,8 +28,9 @@
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
-#include "vxi11_1.10/vxi11_user.h"
+#include "vxi11-1.12/library/vxi11_user.h"
 #include "vxi11cc.h"
+#include <string.h>
 
 PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 {
@@ -46,7 +47,7 @@ PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 	plink->buffer_size = buffer_size;
 	plink->buffer = cp;
 
-	plink->clink = new CLINK;
+	plink->clink = (VXI11_CLINK*)calloc(1,256);
 
 	plink->device_ip = (char *)malloc(120);
 	strncpy(plink->device_ip, device_ip, 100);
@@ -54,11 +55,11 @@ PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 	plink->device_name = (char *)malloc(120);
 	strncpy(plink->device_name, device_name, 100);
 
-	if (vxi11_open_device(plink->device_ip, plink->clink, plink->device_name) != 0) {
+	if (vxi11_open_device(&plink->clink, plink->device_ip, plink->device_name) != 0) {
 		free(plink->buffer);
 		free(plink->device_name);
 		free(plink->device_ip);
-		delete plink->clink;
+		free(plink->clink);
 		delete plink;
 		return NULL;
 	}
@@ -67,9 +68,9 @@ PLINK *iconnect(char *device_ip, long buffer_size, char *device_name)
 
 int icommand(PLINK *plink, char *cmd, long timeout_ms)
 {
-	if (vxi11_send(plink->clink, cmd) < 0) return 0;
+	if (vxi11_send(plink->clink, cmd, strlen(cmd)+1) < 0) return 0;
 	if (strstr(cmd, "?") != 0) {
-		return vxi11_receive(plink->clink, plink->buffer, plink->buffer_size, timeout_ms);
+		return vxi11_receive(plink->clink, plink->buffer, plink->buffer_size);
 	}
 	return 0;
 }
@@ -82,11 +83,11 @@ long long iresponse(PLINK *plink, int index)
 
 int idisconnect(PLINK *plink)
 {
-	vxi11_close_device(plink->device_ip, plink->clink);
+	vxi11_close_device(plink->clink, plink->device_ip);
 	free(plink->buffer);
 	free(plink->device_name);
 	free(plink->device_ip);
-	delete plink->clink;
+	free(plink->clink);
 	delete plink;
 
 	return 0;
