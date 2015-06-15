@@ -37,7 +37,7 @@ Here is the help from the python program:
 Usage: scopeio.py [--nomeas] [--nomodes] [--mode=state] [--after=state]
      [--help] [--prefix=namestart] [--view=program] [--format=<fmt>] 
      [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename]
-     [--size=xsize,ysize] [channels] ... [channels]
+     [--size=xsize,ysize] [--bgcolor=color] [channels] ... [channels]
 
 Default prefix is "scope".
 Formats supported now: png (default) and svg.
@@ -47,6 +47,8 @@ Setting --mode=STOP or --mode=RUN is mode for measurement time and similarly
 not to change scope mode.
 Default size is 1000,640 pixels, can be for example by --size=800,480, this
 does not affect the screendump, which is always 800,480 from the scope
+For --bgcolor the best are default white and other bright colors (cyan, grey70 etc.),
+because the texts are still always black.
 
 Examples:
   scopeio.py --nomeas --view=mirage 1           -- ch1 shown in mirage with no measurements (faster)
