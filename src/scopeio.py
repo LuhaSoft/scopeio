@@ -31,6 +31,7 @@ class scopeIO():
                 self.mode = ''
                 self.after = ''
                 self.size='1000,640'
+		self.bgcolor='"white"'
 		self.sequence = 1
                 self.device = 'Rigol_DS1054'
                 
@@ -38,7 +39,7 @@ class scopeIO():
                 print('Usage: scopeio.py [--nomeas] [--nomodes] [--mode=state] [--after=state]')
                 print('     [--help] [--prefix=namestart] [--view=program] [--format=<fmt>] ')
                 print('     [--screen] [--noscreen] [--addr=a.b.c.d] [--config=filename]')
-                print('     [--size=xsize,ysize] [channels] ... [channels]')
+                print('     [--size=xsize,ysize] [--bgcolor=color] [channels] ... [channels]')
                 print('')
                 print('Default prefix is "scope".')
                 print('Formats supported now: png (default) and svg.')
@@ -48,6 +49,8 @@ class scopeIO():
                 print('not to change scope mode.')
                 print('Default size is 1000,640 pixels, can be for example by --size=800,480, this')
                 print('does not affect the screendump, which is always 800,480 from the scope')
+		print('For --bgcolor the best are default white and other bright colors (cyan, grey70 etc.),')
+		print('because the texts are still always black.')
                 print('')
                 print('Examples:')
                 print('  scopeio.py --nomeas --view=mirage 1           -- ch1 shown in mirage with no measurements (faster)')
@@ -94,6 +97,8 @@ class scopeIO():
                         elif item[0:9] == '--format=':
                                 if item[9:12] == 'svg':
                                         self.outformat = '.svg'
+                        elif item[0:10] == '--bgcolor=':
+                                self.bgcolor = '"'+item[10:]+'"'
                         elif item[0:9] == '--config=':
                                 self.config = item[9:]
                         elif item[0:9] == '--prefix=':
@@ -204,9 +209,8 @@ class scopeIO():
                 g('set ylabel \' Voltage in V\'')
                 g('set grid')
 
-                if self.outformat == ".svg":
-                        g('set object 1 rect from screen 0, 0, 0 to screen 1, 1, 0 behind')
-                        g('set object 1 rect fc  rgb "white"  fillstyle solid 1.0')
+                g('set object 1 rect from screen 0, 0, 0 to screen 1, 1, 0 behind')
+                g('set object 1 rect fc  rgb ' + self.bgcolor + '  fillstyle solid 1.0')
                         
                 if i == 4:
                         g.plot(gdata[0],gdata[1],gdata[2],gdata[3])
